@@ -32,6 +32,7 @@ sample/
 temp/
 tmp/
 *.log
+*.csv
 
 # OS generated files
 .DS_Store
