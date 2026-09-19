@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PDFDataExtractorTemplate",
+  "type": "object",
+  "required": ["id", "name", "version", "rules"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rule_id", "key_name", "data_type", "rule_type"],
+        "properties": {
+          "rule_id": { "type": "string", "format": "uuid" },
+          "key_name": { "type": "string", "pattern": "^[a-zA-Z0-9_]+$" },
+          "data_type": { "type": "string", "enum": ["STRING", "NUMBER", "CURRENCY", "DATE"] },
+          "rule_type": { "type": "string", "enum": ["ANCHOR_SEARCH", "BOUNDING_BOX"] },
+          "anchor_text": { "type": "string" },
+          "search_mode": { "type": "string", "enum": ["EXACT", "CONTAINS", "REGEX", "CASE_INSENSITIVE"] },
+          "direction": { "type": "string", "enum": ["RIGHT", "BELOW", "LEFT", "ABOVE"] },
+          "offset_distance": { "type": "number", "minimum": 0 },
+          "match_index": { "type": "integer", "minimum": 0 },
+          "page_index": { "type": "integer", "minimum": 0 },
+          "box": {
+            "type": "object",
+            "required": ["x_pct", "y_pct", "width_pct", "height_pct"],
+            "properties": {
+              "x_pct": { "type": "number", "minimum": 0, "maximum": 1 },
+              "y_pct": { "type": "number", "minimum": 0, "maximum": 1 },
+              "width_pct": { "type": "number", "minimum": 0, "maximum": 1 },
+              "height_pct": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}
