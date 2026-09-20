@@ -88,6 +88,8 @@ class TestBoundaryDetectorLiteralMatch:
         rect_excl = BoundaryDetector.detect_bounds(doc[0], cfg_exclude_end)
         rect_incl = BoundaryDetector.detect_bounds(doc[0], cfg_include_end)
         doc.close()
+        assert rect_excl is not None
+        assert rect_incl is not None
         assert rect_incl.y1 >= rect_excl.y1
 
     def test_start_not_found_returns_none(self, tmp_path):
