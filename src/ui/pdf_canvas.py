@@ -7,6 +7,8 @@ from typing import Optional
 class PdfCanvasWidget(QGraphicsView):
     # Signal emitted when a bounding box is selected (x_pct, y_pct, w_pct, h_pct)
     box_selected = Signal(float, float, float, float)
+    # Signal emitted when the current page changes (current_page_0indexed, total_pages)
+    page_changed = Signal(int, int)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -18,6 +20,7 @@ class PdfCanvasWidget(QGraphicsView):
         
         self.document: Optional[fitz.Document] = None
         self.current_page = 0
+        self.total_pages = 0
         self.pixmap_item: Optional[QGraphicsPixmapItem] = None
         self.zoom_factor = 1.0
         self.highlight_item = None
@@ -39,10 +42,39 @@ class PdfCanvasWidget(QGraphicsView):
 
     def load_document(self, file_path: str):
         self.document = fitz.open(file_path)
+        self.total_pages = len(self.document)
         self.current_page = 0
         self.render_page()
+        self.page_changed.emit(self.current_page, self.total_pages)
 
-    def highlight_box(self, box):
+    def set_page(self, page_index: int):
+        """Navigate to a specific 0-indexed page. Clamps to valid range."""
+        if not self.document:
+            return
+        clamped = max(0, min(page_index, self.total_pages - 1))
+        self.current_page = clamped
+        self.render_page()
+        self.page_changed.emit(self.current_page, self.total_pages)
+
+    def next_page(self):
+        """Navigate to the next page, clamped at the last page."""
+        if not self.document:
+            return
+        if self.current_page < self.total_pages - 1:
+            self.current_page += 1
+            self.render_page()
+            self.page_changed.emit(self.current_page, self.total_pages)
+
+    def prev_page(self):
+        """Navigate to the previous page, clamped at page 0."""
+        if not self.document:
+            return
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.render_page()
+            self.page_changed.emit(self.current_page, self.total_pages)
+
+    def highlight_box(self, box, is_table: bool = False):
         from PySide6.QtWidgets import QGraphicsRectItem
         from PySide6.QtGui import QPen, QBrush
         
@@ -60,10 +92,14 @@ class PdfCanvasWidget(QGraphicsView):
         h = box.height_pct * rect.height()
         
         self.highlight_item = QGraphicsRectItem(x, y, w, h)
-        pen = QPen(QColor(255, 0, 0, 255))
+        if is_table:
+            pen = QPen(QColor(16, 185, 129, 255))
+            brush = QBrush(QColor(16, 185, 129, 60))
+        else:
+            pen = QPen(QColor(255, 0, 0, 255))
+            brush = QBrush(QColor(255, 0, 0, 50))
         pen.setWidth(2)
         self.highlight_item.setPen(pen)
-        brush = QBrush(QColor(255, 0, 0, 50))
         self.highlight_item.setBrush(brush)
         self.scene.addItem(self.highlight_item)
 

@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 from typing import List
 from src.domain.models import ExtractedRecord, Template
@@ -36,6 +37,10 @@ class CSVExporter:
                 
                 # Fill in extracted data
                 for key in rule_keys:
-                    row[key] = record.extracted_values.get(key, "")
+                    val = record.extracted_values.get(key, "")
+                    if isinstance(val, (list, dict)):
+                        row[key] = json.dumps(val, ensure_ascii=False)
+                    else:
+                        row[key] = val if val is not None else ""
                     
                 writer.writerow(row)

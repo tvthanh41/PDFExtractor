@@ -14,11 +14,11 @@ VSVersionInfo(
       [
       StringTable(
         '040904B0',
-        [StringStruct('CompanyName', 'github-spec-kit'),
+        [StringStruct('CompanyName', 'Thanh Truong'),
         StringStruct('FileDescription', 'PDF Data Extractor'),
         StringStruct('FileVersion', '1.0.0'),
         StringStruct('InternalName', 'PDFExtractor'),
-        StringStruct('LegalCopyright', 'Copyright (c) 2026 github-spec-kit'),
+        StringStruct('LegalCopyright', 'Copyright (c) 2026 Thanh Truong'),
         StringStruct('OriginalFilename', 'PDFExtractor.exe'),
         StringStruct('ProductName', 'PDF Data Extractor'),
         StringStruct('ProductVersion', '1.0.0')])

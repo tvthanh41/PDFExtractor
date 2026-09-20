@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TableExtractionRule",
+  "description": "Schema contract for Table Extraction Rule in template JSON files",
+  "type": "object",
+  "required": ["rule_id", "key_name", "data_type", "rule_type", "page_index", "box", "config"],
+  "properties": {
+    "rule_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "key_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "data_type": {
+      "type": "string",
+      "enum": ["STRING", "NUMBER", "CURRENCY", "DATE"]
+    },
+    "rule_type": {
+      "type": "string",
+      "const": "TABLE"
+    },
+    "page_index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "box": {
+      "type": "object",
+      "required": ["x_pct", "y_pct", "width_pct", "height_pct"],
+      "properties": {
+        "x_pct": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "y_pct": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "width_pct": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "height_pct": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+      }
+    },
+    "config": {
+      "type": "object",
+      "required": ["has_borders", "vertical_strategy", "horizontal_strategy", "header_rows_count", "snap_tolerance"],
+      "properties": {
+        "has_borders": { "type": "boolean", "default": true },
+        "vertical_strategy": { "type": "string", "enum": ["lines", "text", "explicit"], "default": "lines" },
+        "horizontal_strategy": { "type": "string", "enum": ["lines", "text", "explicit"], "default": "lines" },
+        "header_rows_count": { "type": "integer", "minimum": 0, "default": 1 },
+        "snap_tolerance": { "type": "number", "minimum": 0.0, "default": 3.0 },
+        "extract_as_key_value": { "type": "boolean", "default": false }
+      }
+    }
+  }
+}

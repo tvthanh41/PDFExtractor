@@ -106,7 +106,8 @@ class TemplateController:
 
     def add_rule(self):
         if not self.view: return
-        dialog = RuleDialog(self.view)
+        current_page = self.view.canvas.current_page if self.view.canvas else 0
+        dialog = RuleDialog(self.view, default_page_index=current_page)
         if dialog.exec():
             rule = dialog.get_rule()
             self.template.rules.append(rule)
@@ -114,7 +115,18 @@ class TemplateController:
 
     def add_box_rule(self, box: BoundingBox):
         if not self.view: return
-        dialog = RuleDialog(self.view, predefined_box=box)
+        current_page = self.view.canvas.current_page if self.view.canvas else 0
+        dialog = RuleDialog(self.view, predefined_box=box, default_page_index=current_page)
+        if dialog.exec():
+            rule = dialog.get_rule()
+            self.template.rules.append(rule)
+            self.view.add_rule_to_table(rule)
+
+    def add_table_rule(self, box: BoundingBox):
+        if not self.view: return
+        current_page = self.view.canvas.current_page if self.view.canvas else 0
+        dialog = RuleDialog(self.view, predefined_box=box, default_page_index=current_page)
+        dialog.rule_type_combo.setCurrentText(RuleType.TABLE.value)
         if dialog.exec():
             rule = dialog.get_rule()
             self.template.rules.append(rule)
@@ -136,7 +148,7 @@ class TemplateController:
         if index < 0 or index >= len(self.template.rules):
             return
         rule = self.template.rules[index]
-        if getattr(rule, 'rule_type', None) != RuleType.BOUNDING_BOX:
+        if getattr(rule, 'rule_type', None) not in (RuleType.BOUNDING_BOX, RuleType.TABLE):
             self.view.show_error(t("msg.not_box_rule") if t("msg.not_box_rule") != "msg.not_box_rule" else "Cannot reselect region for non-bounding box rules.")
             return
         self.reselecting_row = index
@@ -178,16 +190,28 @@ class TemplateController:
         if self.doc:
             try:
                 strategy = ExtractionStrategyFactory.create(rule)
-                val = strategy.extract(self.doc, self.view.canvas.current_page)
-                self.view.update_preview(str(val))
+                # Use rule's own page_index for correct multi-page extraction
+                page_num = getattr(rule, 'page_index', 0)
+                val = strategy.extract(self.doc, page_num)
+                if isinstance(val, dict):
+                    summary = f"Table KV ({len(val)} pairs)"
+                    self.view.update_preview(summary)
+                elif isinstance(val, list) and val and isinstance(val[0], list):
+                    summary = f"Table ({len(val)} rows x {len(val[0])} cols)"
+                    self.view.update_preview(summary)
+                else:
+                    self.view.update_preview(str(val))
             except Exception as e:
                 self.view.update_preview(f"Error: {str(e)}")
         else:
             self.view.update_preview("None")
             
         if hasattr(self.view, 'canvas') and self.view.canvas:
-            if getattr(rule, 'rule_type', None) == RuleType.BOUNDING_BOX:
-                self.view.canvas.highlight_box(getattr(rule, 'box', None))
+            rule_type = getattr(rule, 'rule_type', None)
+            if rule_type == RuleType.BOUNDING_BOX:
+                self.view.canvas.highlight_box(getattr(rule, 'box', None), is_table=False)
+            elif rule_type == RuleType.TABLE:
+                self.view.canvas.highlight_box(getattr(rule, 'box', None), is_table=True)
             else:
                 self.view.canvas.highlight_box(None)
 
@@ -218,10 +242,11 @@ class TemplateController:
             return
             
         results = {}
-        page_num = self.view.canvas.current_page
         
         for rule in self.template.rules:
             strategy = ExtractionStrategyFactory.create(rule)
+            # Each rule specifies its own page_index
+            page_num = getattr(rule, 'page_index', 0)
             val = strategy.extract(self.doc, page_num)
             results[getattr(rule, 'key_name', str(rule))] = val
             
@@ -252,7 +277,8 @@ class TemplateController:
             return
             
         rule = self.template.rules[index]
-        page_num = self.view.canvas.current_page
+        # Use rule's own page_index for correct multi-page extraction
+        page_num = getattr(rule, 'page_index', 0)
         
         try:
             strategy = ExtractionStrategyFactory.create(rule)

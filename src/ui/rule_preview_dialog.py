@@ -11,7 +11,27 @@ class RulePreviewDialog(QDialog):
         
         self.text_edit = QTextEdit()
         self.text_edit.setReadOnly(True)
-        self.text_edit.setPlainText(str(extracted_text) if extracted_text is not None else "")
+        
+        if isinstance(extracted_text, dict):
+            max_k_len = max([len(str(k)) for k in extracted_text.keys()] or [0])
+            lines = [f"{str(k).ljust(max_k_len)} : {str(v)}" for k, v in extracted_text.items()]
+            display_text = "\n".join(lines)
+        elif isinstance(extracted_text, list) and extracted_text and isinstance(extracted_text[0], list):
+            col_widths = {}
+            for row in extracted_text:
+                for idx, cell in enumerate(row):
+                    col_widths[idx] = max(col_widths.get(idx, 0), len(str(cell)))
+            lines = []
+            for row_idx, row in enumerate(extracted_text):
+                formatted_cells = [str(cell).ljust(col_widths.get(idx, 0)) for idx, cell in enumerate(row)]
+                lines.append(" | ".join(formatted_cells))
+                if row_idx == 0 and len(extracted_text) > 1:
+                    lines.append("-+-".join("-" * col_widths.get(idx, 0) for idx in range(len(row))))
+            display_text = "\n".join(lines)
+        else:
+            display_text = str(extracted_text) if extracted_text is not None else ""
+            
+        self.text_edit.setPlainText(display_text)
         layout.addWidget(self.text_edit)
         
         btn_layout = QHBoxLayout()

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PatternTableExtractionRuleSchema",
+  "type": "object",
+  "required": ["rule_id", "key_name", "data_type", "rule_type", "page_index", "boundary_type", "config"],
+  "properties": {
+    "rule_id": { "type": "string" },
+    "key_name": { "type": "string", "minLength": 1 },
+    "data_type": { "type": "string", "enum": ["STRING", "NUMBER", "CURRENCY", "DATE"] },
+    "rule_type": { "type": "string", "const": "TABLE" },
+    "page_index": { "type": "integer", "minimum": 0 },
+    "boundary_type": { "type": "string", "enum": ["BOUNDING_BOX", "PATTERN_MATCH"] },
+    "box": {
+      "type": ["object", "null"],
+      "properties": {
+        "x_pct": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "y_pct": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "width_pct": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "height_pct": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+      },
+      "required": ["x_pct", "y_pct", "width_pct", "height_pct"]
+    },
+    "pattern_boundary": {
+      "type": ["object", "null"],
+      "properties": {
+        "start_pattern": { "type": "string", "minLength": 1 },
+        "end_pattern": { "type": "string", "minLength": 1 },
+        "include_start": { "type": "boolean", "default": true },
+        "include_end": { "type": "boolean", "default": false },
+        "is_regex": { "type": "boolean", "default": false },
+        "skip_k": { "type": "integer", "minimum": 0, "default": 0 }
+      },
+      "required": ["start_pattern", "end_pattern"]
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "has_borders": { "type": "boolean", "default": true },
+        "vertical_strategy": { "type": "string", "enum": ["lines", "text", "explicit"] },
+        "horizontal_strategy": { "type": "string", "enum": ["lines", "text", "explicit"] },
+        "header_rows_count": { "type": "integer", "minimum": 0, "default": 1 },
+        "snap_tolerance": { "type": "number", "minimum": 0.0, "default": 3.0 },
+        "extract_as_key_value": { "type": "boolean", "default": false },
+        "engine": { "type": "string", "enum": ["pymupdf", "pymupdf4llm"], "default": "pymupdf" }
+      }
+    }
+  }
+}

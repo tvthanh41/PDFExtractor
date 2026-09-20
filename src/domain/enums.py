@@ -21,6 +21,20 @@ class Direction(str, Enum):
 class RuleType(str, Enum):
     ANCHOR_SEARCH = "ANCHOR_SEARCH"
     BOUNDING_BOX = "BOUNDING_BOX"
+    TABLE = "TABLE"
+
+class TableStrategy(str, Enum):
+    LINES = "lines"
+    TEXT = "text"
+    EXPLICIT = "explicit"
+
+class TableBoundaryType(str, Enum):
+    BOUNDING_BOX = "BOUNDING_BOX"
+    PATTERN_MATCH = "PATTERN_MATCH"
+
+class TableEngine(str, Enum):
+    PYMUPDF = "pymupdf"
+    PYMUPDF4LLM = "pymupdf4llm"
 
 class JobStatus(str, Enum):
     PENDING = "PENDING"

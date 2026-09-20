@@ -13,7 +13,12 @@ class AnchorExtractionStrategy(IExtractionStrategy):
     def extract(self, doc: fitz.Document, page_num: int) -> Optional[str]:
         if page_num < 0 or page_num >= len(doc):
             return None
-            
+
+        # Honour rule.page_index: only extract from the designated page
+        rule_page = getattr(self.rule, 'page_index', 0)
+        if page_num != rule_page:
+            return None
+
         page = doc[page_num]
         words = page.get_text("words")
         

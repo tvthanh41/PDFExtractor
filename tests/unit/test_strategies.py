@@ -110,7 +110,7 @@ def test_anchor_strategy_pseudo_bolding_and_artifact_overlap():
 
 def test_bounding_box_strategy(sample_pdf, monkeypatch):
     monkeypatch.setattr(PdfService, "get_page_dimensions", lambda doc, p: (
-        doc.pages[p].rect.width, doc.pages[p].rect.height
+        0.0, 0.0, doc.pages[p].rect.width, doc.pages[p].rect.height
     ))
 
     # Box around Vendor Acme Corp (50, 100) -> (200, 150)

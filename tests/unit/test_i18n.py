@@ -45,6 +45,20 @@ class TestLocaleLoader:
         locales = LocaleLoader.discover()
         assert "en" in locales
 
+    def test_locale_loader_discovers_vi(self):
+        locales = LocaleLoader.discover()
+        assert "vi" in locales
+        assert locales["vi"] == "Tiếng Việt"
+
+    def test_vi_has_complete_key_parity_with_en(self):
+        en_data = LocaleLoader.load("en")
+        vi_data = LocaleLoader.load("vi")
+        missing_keys = [k for k in en_data if k not in vi_data]
+        assert missing_keys == [], f"Missing keys in vi.json: {missing_keys}"
+        # Also ensure no empty translations
+        empty_keys = [k for k, v in vi_data.items() if not str(v).strip()]
+        assert empty_keys == [], f"Empty translations in vi.json: {empty_keys}"
+
     def test_locale_loader_returns_display_name(self):
         locales = LocaleLoader.discover()
         # Depending on if en.json is loaded, it should return English

@@ -10,6 +10,8 @@ from src.services.template_repository import TemplateRepository
 def process_file_worker(file_path: str, template: Template) -> ExtractedRecord:
     """
     Standalone function to process a single PDF file (GIL-friendly).
+    Each rule is executed on its specified page_index (0-indexed).
+    If page_index exceeds the document's page count, the rule result is None.
     """
     record = ExtractedRecord(
         file_path=file_path,
@@ -18,15 +20,15 @@ def process_file_worker(file_path: str, template: Template) -> ExtractedRecord:
     
     try:
         doc = fitz.open(file_path)
+        total_pages = len(doc)
         
         for rule in template.rules:
-            strategy = ExtractionStrategyFactory.create(rule)
-            
-            # For MVP, assume we just check page 0 for Anchor, or use rule.page_index for Box
-            page_num = 0
-            if hasattr(rule, 'page_index'):
-                page_num = rule.page_index
+            page_num = getattr(rule, 'page_index', 0)
+            if page_num >= total_pages:
+                record.extracted_values[rule.key_name] = None
+                continue
                 
+            strategy = ExtractionStrategyFactory.create(rule)
             val = strategy.extract(doc, page_num)
             record.extracted_values[rule.key_name] = val
             

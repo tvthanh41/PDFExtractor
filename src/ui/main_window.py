@@ -52,21 +52,27 @@ class MainWindow(QMainWindow):
         edit_menu.addAction(settings_action)
         
         # Help Menu
-        help_menu = menubar.addMenu("Help")
-        about_action = QAction("About", self)
+        help_menu = menubar.addMenu(t("menu.help"))
+        about_action = QAction(t("menu.help.about"), self)
         about_action.triggered.connect(self.show_about_dialog)
         help_menu.addAction(about_action)
         
     def show_about_dialog(self):
-        # We can read the version from metadata, but for now hardcode per spec
+        title = t("about.title")
+        app_title = t("window.title")
+        version_label = t("about.version")
+        author_label = t("about.author")
+        copyright_label = t("about.copyright")
+        desc = t("about.description")
+
         QMessageBox.about(
             self,
-            "About PDF Data Extractor",
-            "<h3>PDF Data Extractor</h3>"
-            "<p>Version: 1.0.0</p>"
-            "<p>Author: github-spec-kit</p>"
-            "<p>Copyright (c) 2026 github-spec-kit</p>"
-            "<p>A modern PySide6-based application for extracting structured data from PDF files using rule-based templates.</p>"
+            title,
+            f"<h3>{app_title}</h3>"
+            f"<p>{version_label}: 1.0.0</p>"
+            f"<p>{author_label}: Thanh Truong</p>"
+            f"<p>{copyright_label} (c) 2026 Thanh Truong</p>"
+            f"<p>{desc}</p>"
         )
         
     def add_workspace_tab(self, widget, title=None):
