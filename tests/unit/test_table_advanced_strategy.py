@@ -62,11 +62,15 @@ def test_rule_preview_dialog_table_rendering(qapp):
         ["ValA", "ValB"]
     ]
     dialog = RulePreviewDialog("test_table", table_data)
-    rendered = dialog.text_edit.toPlainText()
-    assert "Col1" in rendered
-    assert "Col2" in rendered
-    assert "-+-" in rendered  # check header separator
-    assert "ValA" in rendered
+    # New impl uses a QTableWidget — check headers and cell values
+    tbl = dialog.findChild(__import__("PySide6.QtWidgets", fromlist=["QTableWidget"]).QTableWidget)
+    assert tbl is not None, "Expected a QTableWidget in the dialog"
+    assert tbl.columnCount() == 2
+    assert tbl.horizontalHeaderItem(0).text() == "Col1"
+    assert tbl.horizontalHeaderItem(1).text() == "Col2"
+    assert tbl.rowCount() == 1
+    assert tbl.item(0, 0).text() == "ValA"
+    assert tbl.item(0, 1).text() == "ValB"
 
 def test_rule_preview_dialog_dict_rendering(qapp):
     dict_data = {
@@ -75,10 +79,17 @@ def test_rule_preview_dialog_dict_rendering(qapp):
         "Sidekick 2": "Emma Watson"
     }
     dialog = RulePreviewDialog("characters", dict_data)
-    rendered = dialog.text_edit.toPlainText()
-    assert "Main character" in rendered
-    assert "Daniel Radcliffe" in rendered
-    assert "Sidekick 1" in rendered
-    assert "Rupert Grint" in rendered
-    assert "Sidekick 2" in rendered
-    assert "Emma Watson" in rendered
+    # New impl uses a 2-column key/value QTableWidget
+    tbl = dialog.findChild(__import__("PySide6.QtWidgets", fromlist=["QTableWidget"]).QTableWidget)
+    assert tbl is not None, "Expected a QTableWidget in the dialog"
+    assert tbl.columnCount() == 2
+    assert tbl.rowCount() == 3
+    keys = [tbl.item(r, 0).text() for r in range(tbl.rowCount())]
+    vals = [tbl.item(r, 1).text() for r in range(tbl.rowCount())]
+    assert "Main character" in keys
+    assert "Daniel Radcliffe" in vals
+    assert "Sidekick 1" in keys
+    assert "Rupert Grint" in vals
+    assert "Sidekick 2" in keys
+    assert "Emma Watson" in vals
+

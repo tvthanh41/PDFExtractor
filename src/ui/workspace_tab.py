@@ -179,7 +179,7 @@ class WorkspaceTabWidget(QWidget):
         
     def on_preview_rule_clicked(self, button):
         for i in range(self.rules_table.rowCount()):
-            if self.rules_table.cellWidget(i, 3) == button:
+            if self.rules_table.cellWidget(i, 4) == button:
                 self.controller.preview_single_rule(i)
                 break
         
